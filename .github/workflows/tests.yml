@@ -14,16 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     name: PHP 8.4 Tests
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: password
-          MYSQL_DATABASE: testing
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -71,33 +61,9 @@ jobs:
           php artisan key:generate --ansi
           php artisan config:cache
           php artisan route:cache
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
-
-      - name: Run Database Migrations
-        run: php artisan migrate --force
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
 
       - name: Run Tests
         run: ./vendor/bin/pest --colors=always --parallel --coverage-clover coverage.xml
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: testing
-          DB_USERNAME: root
-          DB_PASSWORD: password
 
       - name: Upload Coverage Reports
         uses: codecov/codecov-action@v4
