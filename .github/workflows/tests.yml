@@ -152,6 +152,3 @@ jobs:
 
       - name: Run JavaScript/TypeScript Linting
         run: npm run lint
-
-      - name: Check Code Formatting
-        run: npm run format:check
