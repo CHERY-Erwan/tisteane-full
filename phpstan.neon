@@ -1,0 +1,27 @@
+parameters:
+    level: 6
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+    excludePaths:
+        - vendor
+        - storage
+        - bootstrap/cache
+    ignoreErrors:
+        # Laravel specific ignores
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Builder#'
+        - '#Call to an undefined method Illuminate\\Database\\Query\\Builder#'
+        - '#Call to an undefined method Illuminate\\Contracts\\Auth\\Guard#'
+        - '#Access to an undefined property Illuminate\\Http\\Request#'
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Model#'
+        - '#Access to an undefined property Illuminate\\Database\\Eloquent\\Collection#'
+        - '#Call to an undefined method PHPUnit\\Framework\\TestCase::(get|post|put|patch|delete|actingAs|assertAuthenticated|assertGuest)#'
+        - '#Call to an undefined method Illuminate\\Database\\Eloquent\\Factories\\Factory::unverified#'
+        - '#Undefined variable: \$this#'
+        - '#Unable to resolve the template type TValue in call to function expect#'
+        - '#Call to an undefined static method App\\Models\\.*::create#'
+        - '#Class .* uses generic trait .* but does not specify its types#'
+    reportUnmatchedIgnoredErrors: false
