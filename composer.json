@@ -72,6 +72,7 @@
         "test:types": "./vendor/bin/phpstan analyse",
         "test:unit": "pest --colors=always --parallel",
         "test:coverage": "pest --colors=always --parallel --coverage",
+        "herd:coverage": "herd coverage ./vendor/bin/pest --coverage",
         "test": [
             "@test:rector",
             "@test:lint",
