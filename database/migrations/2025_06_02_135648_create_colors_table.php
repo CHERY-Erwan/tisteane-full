@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,11 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('colors', function (Blueprint $table) {
+        Schema::create(table: 'colors', callback: function (Blueprint $table): void {
             $table->id();
-            $table->string('code')->unique();
-            $table->json('label')->nullable();
-            $table->string('hex_code')->nullable();
+            $table->string(column: 'code')->unique();
+            $table->json(column: 'label')->nullable();
+            $table->string(column: 'hex_code')->nullable();
             $table->timestamps();
         });
     }
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('colors');
+        Schema::dropIfExists(table: 'colors');
     }
 };
