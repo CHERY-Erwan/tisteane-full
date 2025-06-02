@@ -65,7 +65,7 @@ jobs:
           php artisan key:generate
 
       - name: Tests
-        run: composer test
+        run: composer test:unit
 
   lint:
     runs-on: ubuntu-latest
