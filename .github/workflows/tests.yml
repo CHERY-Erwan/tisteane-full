@@ -1,18 +1,75 @@
-name: tests
+name: Tests
 
 on:
   push:
     branches:
-      - develop
       - main
   pull_request:
     branches:
-      - develop
       - main
+      - develop
 
 jobs:
-  ci:
+  tests:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php: [8.4]
+
+    name: Tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Dependencies PHP
+        id: php-cache
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: dependencies-php-composer-${{ hashFiles('composer.lock') }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: json, dom, curl, libxml, mbstring, zip, pdo, pdo_sqlite
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Set up Node & NPM
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Problem Matches
+        run: |
+          echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+          echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
+      - name: Install PHP dependencies
+        if: steps.php-cache.outputs.cache-hit != 'true'
+        run: composer install --no-interaction --no-progress --ansi
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build dependencies
+        run: npm run build
+
+      - name: Prepare Laravel
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Tests
+        run: composer test:unit
+
+  lint:
+    runs-on: ubuntu-latest
+    name: Code Quality
 
     steps:
       - name: Checkout
@@ -22,32 +79,38 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.4
+          extensions: json, dom, curl, libxml, mbstring, zip
           tools: composer:v2
-          coverage: xdebug
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
 
-      - name: Install Node Dependencies
+      - name: Cache PHP dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: php-8.4-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            php-8.4-composer-
+            php-composer-
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --no-progress --ansi --prefer-dist
+
+      - name: Install Node.js dependencies
         run: npm ci
 
-      - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      - name: Run PHP Linting
+        run: composer test:lint
 
-      - name: Copy Environment File
-        run: cp .env.example .env
+      - name: Run PHP Static Analysis
+        run: composer test:types
 
-      - name: Generate Application Key
-        run: php artisan key:generate
+      - name: Run Rector (Dry Run)
+        run: composer test:rector
 
-      - name: Publish Ziggy Configuration
-        run: php artisan ziggy:generate
-
-      - name: Build Assets
-        run: npm run build
-
-      - name: Tests
-        run: ./vendor/bin/pest
+      - name: Run JavaScript/TypeScript Linting
+        run: npm run lint
